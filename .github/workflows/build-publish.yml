@@ -36,12 +36,14 @@ jobs:
           source: src
           filename: "monitor-info-grabber-${{ steps.vars.outputs.sha_short }}.xpi"
           ignoreFiles: '[ "package.json","package-lock.json","yarn.lock" ]'
+      
+      - run: ls
 
       - name: "Publish Firefox Extension"
         uses: wdzeng/firefox-addon@v1
         with:
           addon-guid: ${{ secrets.FIREFOX_EXTENSION_UUID }}
-          xpi-path: "monitor-info-grabber-${{ steps.vars.outputs.sha_short }}.xpi"
+          xpi-path: "./monitor-info-grabber-${{ steps.vars.outputs.sha_short }}.xpi"
           self-hosted: false
           jwt-issuer: ${{ secrets.FIREFOX_API_KEY }}
           jwt-secret: ${{ secrets.FIREFOX_API_SECRET }}
