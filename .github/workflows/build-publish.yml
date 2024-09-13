@@ -39,5 +39,5 @@ jobs:
           addon-guid: ${{ secrets.FIREFOX_EXTENSION_UUID }}
           xpi-path: "{name}-{version}.xpi"
           self-hosted: false
-          jwt-issuer: ${{ secrets.FIREFOX_JWT_ISSUER }}
-          jwt-secret: ${{ secrets.FIREFOX_JWT_SECRET }}
+          jwt-issuer: ${{ secrets.FIREFOX_API_KEY }}
+          jwt-secret: ${{ secrets.FIREFOX_API_SECRET }}
