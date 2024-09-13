@@ -1,0 +1,43 @@
+name: build
+
+on: 
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: "Build"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install
+        run: yarn install
+
+      - name: ESLint
+        run: yarn run lint
+
+      - name: Prettier
+        run: yarn prettier --write .
+
+      - name: "Build package"
+        id: web-ext-build
+        uses: kewisch/action-web-ext@v1
+        with:
+          cmd: build
+          source: src
+          filename: "{name}-{version}.xpi"
+          ignoreFiles: '[ "package.json","package-lock.json","yarn.lock" ]'
+
+      - name: "Publish Firefox Extension"
+        uses: wdzeng/firefox-addon@v1
+        with:
+          addon-guid: ${{ secrets.FIREFOX_EXTENSION_UUID }}
+          xpi-path: "{name}-{version}.xpi"
+          self-hosted: false
+          jwt-issuer: ${{ secrets.FIREFOX_JWT_ISSUER }}
+          jwt-secret: ${{ secrets.FIREFOX_JWT_SECRET }}
