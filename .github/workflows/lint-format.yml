@@ -1,6 +1,9 @@
 name: front-linter
 
-on: push
+on: 
+  push:
+    branches-ignore:
+      - main
 
 jobs:
   # This workflow contains a single job called "build"
