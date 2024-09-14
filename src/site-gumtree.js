@@ -1,166 +1,197 @@
-const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
-const PROMPT_PREFIX = "Extract and return just the model of the monitor from the advertisement text below. Tip: the model number will contain no spaces, and at least one letter and one number. If there is no model number, say 'no'.\n\n";
+const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
+const PROMPT_PREFIX =
+  "Extract and return just the model of the monitor from the advertisement text below. Tip: the model number will contain no spaces, and at least one letter and one number. If there is no model number, say 'no'.\n\n";
 
-const RTINGS_API_URL = "https://www.rtings.com/api/v2/safe/app/search__search_results"
+const RTINGS_API_URL =
+  "https://www.rtings.com/api/v2/safe/app/search__search_results";
 
-async function fetchMonitorModel(apiKey, element) {
-  console.debug("Fetching model number using GPT, with element: " + element.textContent)
+const manifest = browser.runtime.getManifest();
+
+let apiKey = browser.storage.local.get("api_key");
+apiKey.then(onGot, onError);
+function onGot(item) {
+  console.debug(item["api_key"]);
+
+  console.log(`Extension ${manifest.name} v${manifest.version} starting...`);
+  gumtreeReplaceTextByClass(
+    item["api_key"],
+    "user-ad-row-new-design__title-span",
+  );
+}
+
+function onError(error) {
+  alert("Please set your OpenAI API key in the extension settings.");
+  console.log(`Error: ${error}`);
+}
+
+/**
+ * Sends string (ad title + description) to GPT to analyse, returns just the
+ * monitor model number.
+ * @param {string} apiKey OpenAI API key (https://platform.openai.com/api-keys)
+ * @param {string} promptText Advertisement text to send to GPT for analysis
+ */
+async function GPTFetchMonitorModel(apiKey, promptText) {
   try {
-      let adDescription = element.parentElement.nextElementSibling.nextElementSibling.children[0].textContent
-      const prompt = PROMPT_PREFIX + element.textContent + adDescription;
+    const prompt = PROMPT_PREFIX + promptText;
 
-      console.debug("prompt: " + prompt)
+    console.debug("Fetching model number using GPT, with prompt: " + prompt);
 
-      const requestOptions = {
-          method: 'POST',
-          headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
+    const requestOptions = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "user",
+            content: prompt,
           },
-          body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [
-              {
-              role: "user",
-              content: prompt
-              }
-          ]
-          })
-      };
+        ],
+      }),
+    };
 
-      const response = await fetch(OPENAI_API_URL, requestOptions);
-      const data = await response.json();
-      // return data.choices && data.choices[0] && data.choices[0].message.content.trim();
+    // Send query to GPT
+    const response = await fetch(OPENAI_API_URL, requestOptions);
+    const data = await response.json();
 
-      const modelNumber = data.choices[0].message.content
+    // Extract model number from returned data
+    const modelNumber = data.choices[0].message.content;
 
-      console.debug("Found model number: " + modelNumber)
+    console.debug("Found model number: " + modelNumber);
 
-      var newText;
-      let result = await RTINGSSearch(modelNumber);
-      if (result) {
-        newText = "[[ " + result + " ]] -- " + element.textContent;
-      } else {
-        newText = "[[ " + modelNumber + " ]] -- " + element.textContent;
-      }
-
-      element.textContent = newText; // Assuming the API returns an object with a `newText` property
+    return modelNumber;
   } catch (error) {
-      console.error('There was a problem with the fetch operation:', error);
+    console.error("There was a problem with the fetch operation:", error);
   }
 }
 
-async function replaceTextByClass(apiKey, className) {
+/**
+ * For each ad result, queries ad text + description, and supplements ad title with RTINGS data.
+ * @param {string} apiKey OpenAI API key (https://platform.openai.com/api-keys)
+ * @param {string} className Name of the class we will add information to
+ */
+async function gumtreeReplaceTextByClass(apiKey, className) {
   let elements = document.getElementsByClassName(className);
   let tasks = [];
 
   for (let i = 0; i < elements.length; i++) {
-      // Create a promise for each API call
-      tasks.push(fetchMonitorModel(apiKey, elements[i]));
-      console.debug("Adding another task...")
+    // for each ad element
+    let adTitle = elements[i].textContent + "\n";
+    let adDescription =
+      elements[i].parentElement.nextElementSibling.nextElementSibling
+        .children[0].textContent;
+
+    // Combine the two elements for our prompt
+    let gptPromptAdText = adTitle + adDescription;
+
+    // Send to GPT for analysis
+    tasks.push(
+      GPTFetchMonitorModel(apiKey, gptPromptAdText).then(
+        async function (value) {
+          console.log("Calling func retrieved model number: " + value);
+          // Search RTINGS API for monitor model
+          let result = await RTINGSSearch(value);
+          if (result) {
+            elements[i].textContent =
+              "[[ " + result + " ]] -- " + elements[i].textContent;
+          }
+        },
+        function (error) {
+          console.log("Calling func error: " + error);
+        },
+      ),
+    );
+
+    console.debug("Adding another task...");
   }
 
   // Wait for all API calls to complete
   await Promise.all(tasks);
 
-  console.log('All text replacements completed.');
+  console.log(`${manifest.name} has finished replacing elements on this page.`);
 }
 
-let apiKey = browser.storage.local.get('api_key');
-apiKey.then(onGot, onError);
-function onGot(item) {
-  console.debug(item["api_key"]);
-  console.log("About to start replacing")
-  replaceTextByClass(item["api_key"], 'user-ad-row-new-design__title-span');
-}
-
-function onError(error) {
-  alert('Please set your OpenAI API key in the extension settings.');
-  console.log(`Error: ${error}`);
-}
-
-/*   foreach user-ad-row-new-design__main-content
-var ad_text = user-ad-row-new-design__main-content.inner + user-ad-row-new-design__description user-ad-row-new-design__description--regular.inner
-query gpt
-if hit, search rtings
-result: "No results found", or:
-result.conains [model] && "Monitor Review":
-  follow link, extract .scorecard-table
-
-*/
-
+/**
+ * RTINGS has a search API which we can use to query for our found monitor model number.
+ * @param {string} monitorModel Model name of the monitor we are looking for
+ */
 async function RTINGSSearch(monitorModel) {
-  console.debug("Searching RTINGS for model: " + monitorModel)
+  console.debug("Searching RTINGS for model: " + monitorModel);
   try {
-      const requestOptions = {
-          method: 'POST',
-          headers: {
-          'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            count: 10,
-            is_admin: false,
-            query: monitorModel,
-            type: "full"
-          })
-      };
+    const requestOptions = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        count: 5,
+        is_admin: false,
+        query: monitorModel,
+        type: "full",
+      }),
+    };
 
-      const response = await fetch(RTINGS_API_URL, requestOptions);
-      const data = await response.json();
+    // Send query
+    const response = await fetch(RTINGS_API_URL, requestOptions);
+    const data = await response.json();
 
-      // const className = "searchbar_results-name"
-      // var elements = doc.getElementsByClassName(className);
-      // const elements = doc.querySelectorAll('a');
-      // let tasks = [];
+    // For each search result
+    for (let i = 0; i < data.data.search_results.results.length; i++) {
+      let searchResult = data.data.search_results.results[i];
 
-      for (let i = 0; i < data.data.search_results.results.length; i++) {
-          let result = data.data.search_results.results[i]
-          // Create a promise for each API call
-          // tasks.push(fetchMonitorModel(apiKey, elements[i]));
-          // console.debug("Found href on RTINGS: " + result.url)
-          if (result.url.toLowerCase().includes(monitorModel.toLowerCase()) && result.url.includes("/monitor/reviews")) {
-            console.debug("Found match!");
-            let score = await RTINGSExtractInfo(result.url);
-            return score;
-          }
+      if (
+        // Convert search result model + advertisement model to lowercase for comparison
+        searchResult.url.toLowerCase().includes(monitorModel.toLowerCase()) &&
+        // This ensures we don't grab junk links to discussions, etc.
+        searchResult.url.includes("/monitor/reviews")
+      ) {
+        console.debug("Found match!");
+
+        // Extract the information we are interested in, and return it
+        let score = await RTINGSExtractInfo(searchResult.url);
+        return score;
       }
-
-      // const modelNumber = data.choices[0].message.content
-
-      // console.debug("Found model number: " + modelNumber)
-      // let newText = "[[ " + modelNumber + " ]] -- " + element.textContent;
-
-      // element.textContent = newText; // Assuming the API returns an object with a `newText` property
+    }
   } catch (error) {
-      console.error('There was a problem with the fetch operation:', error);
+    console.error("There was a problem with the fetch operation:", error);
   }
-
-  
-  
 }
 
+/**
+ * RTINGS review pages have an easy-to-read scorecard (e.g. https://www.rtings.com/monitor/reviews/lg/27gl850-b-27gl83a-b). We want to parse this, and return it in a dictionary for later use (customisable display options).
+ * @param {string} url URL (excluding hostname) of the search result
+ */
 async function RTINGSExtractInfo(url) {
-  console.debug("Grabbing monitor details from url: " + url)
+  console.debug("Grabbing monitor details from url: " + url);
   try {
-      const response = await fetch("https://www.rtings.com" + url);
-      const html = await response.text();
+    const response = await fetch("https://www.rtings.com" + url);
+    const html = await response.text();
 
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, "text/html");
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
 
-      const className = "scorecard-row-name"
-      var elements = doc.getElementsByClassName(className);
+    const className = "scorecard-row-name";
+    var elements = doc.getElementsByClassName(className);
 
-      for (let i = 0; i < elements.length; i++) {
-        if (elements[i].textContent.includes("Color Accuracy")) {
-          return "CA: " + elements[i].previousElementSibling.childNodes[1].textContent;
-        } else if (elements[i].textContent.includes("SDR Picture")) {
-          return "SDR: " + elements[i].previousElementSibling.childNodes[1].textContent;
-        } else if (elements[i].textContent.includes("Media Creation")) {
-          return "MC: " + elements[i].previousElementSibling.childNodes[1].textContent;
-        }
+    for (let i = 0; i < elements.length; i++) {
+      if (elements[i].textContent.includes("Color Accuracy")) {
+        return (
+          "CA: " + elements[i].previousElementSibling.childNodes[1].textContent
+        );
+      } else if (elements[i].textContent.includes("SDR Picture")) {
+        return (
+          "SDR: " + elements[i].previousElementSibling.childNodes[1].textContent
+        );
+      } else if (elements[i].textContent.includes("Media Creation")) {
+        return (
+          "MC: " + elements[i].previousElementSibling.childNodes[1].textContent
+        );
       }
+    }
   } catch (error) {
-      console.error('There was a problem with the fetch operation:', error);
+    console.error("There was a problem with the fetch operation:", error);
   }
 }
