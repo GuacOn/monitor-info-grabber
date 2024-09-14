@@ -142,13 +142,6 @@ async function RTINGSSearch(monitorModel) {
 async function RTINGSExtractInfo(url) {
   console.debug("Grabbing monitor details from url: " + url)
   try {
-      const requestOptions = {
-          method: 'GET',
-          headers: {
-          'Content-Type': 'text/html',
-          }
-      };
-
       const response = await fetch("https://www.rtings.com" + url);
       const html = await response.text();
 
