@@ -14,7 +14,11 @@
   "content_scripts": [
     {
       "matches": ["*://*.gumtree.com.au/s-monitors/*"],
-      "js": ["site-gumtree.js"]
+      "js": ["site-gumtree-search.js"]
+    },
+    {
+      "matches": ["*://*.gumtree.com.au/s-ad/*"],
+      "js": ["site-gumtree-ad.js"]
     }
   ]
 }
