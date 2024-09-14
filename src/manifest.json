@@ -3,7 +3,7 @@
   "name": "Monitor Info Grabber",
   "version": "1.0.1",
   "description": "Uses AI to supplement listings for used monitors with information from the Rtings review site.",
-  "permissions": ["activeTab", "storage", "*://*.gumtree.com.au/s-monitors/*", "https://api.openai.com/v1/chat/completions"],
+  "permissions": ["activeTab", "storage", "*://*.gumtree.com.au/s-monitors/*", "https://api.openai.com/v1/chat/completions", "https://www.rtings.com/search"],
   "icons": {
     "96": "icons/border-96.png"
   },
