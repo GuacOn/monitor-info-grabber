@@ -1,20 +1,20 @@
 {
-    "name": "monitor-info-grabber",
-    "version": "1.0.0",
-    "description": "",
-    "scripts": {
-        "lint": "eslint eslint.config.mjs 'src/*.{js,jsx,ts,tsx}'",
-        "fix": "yarn format && yarn lint:fix",
-        "format": "prettier --write 'src/*.{js,jsx,ts,tsx}'",
-        "lint:fix": "eslint --fix 'src/*.{js,jsx,ts,tsx}'",
-        "fix:eslint": "eslint src --ext .js,.ts,.jsx,.tsx --fix",
-        "fix:prettier": "prettier --write ."
-    },
-    "keywords": [],
-    "author": "",
-    "devDependencies": {
-      "eslint": ">9.0.0",
-      "eslint-config-prettier": ">9.0.0",
-      "prettier": ">3.0.0"
-    }
+  "name": "monitor-info-grabber",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "lint": "eslint eslint.config.mjs 'src/*.{js,jsx,ts,tsx}'",
+    "fix": "yarn format && yarn lint:fix",
+    "format": "prettier --write 'src/*.{js,jsx,ts,tsx}'",
+    "lint:fix": "eslint --fix 'src/*.{js,jsx,ts,tsx}'",
+    "fix:eslint": "eslint src --ext .js,.ts,.jsx,.tsx --fix",
+    "fix:prettier": "prettier --write ."
+  },
+  "keywords": [],
+  "author": "",
+  "devDependencies": {
+    "eslint": ">9.0.0",
+    "eslint-config-prettier": ">9.0.0",
+    "prettier": ">3.0.0"
   }
+}

@@ -1,6 +1,6 @@
 name: build
 
-on: 
+on:
   push:
     branches:
       - main
@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
 
       - name: Install
         run: yarn install
@@ -36,7 +36,7 @@ jobs:
           source: src
           filename: "monitor-info-grabber-${{ steps.vars.outputs.sha_short }}.xpi"
           ignoreFiles: '[ "package.json","package-lock.json","yarn.lock" ]'
-      
+
       - run: ls src
 
       - name: "Publish Firefox Extension"
