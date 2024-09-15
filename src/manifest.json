@@ -3,7 +3,13 @@
   "name": "Monitor Info Grabber",
   "version": "1.0.2",
   "description": "Uses AI to supplement listings for used monitors with information from the Rtings review site.",
-  "permissions": ["activeTab", "storage", "*://*.gumtree.com.au/s-monitors/*", "https://api.openai.com/v1/chat/completions", "https://www.rtings.com/search"],
+  "permissions": [
+    "activeTab",
+    "storage",
+    "*://*.gumtree.com.au/s-monitors/*",
+    "https://api.openai.com/v1/chat/completions",
+    "https://www.rtings.com/search"
+  ],
   "icons": {
     "96": "icons/border-96.png"
   },
@@ -14,11 +20,11 @@
   "content_scripts": [
     {
       "matches": ["*://*.gumtree.com.au/s-monitors/*"],
-      "js": ["site-gumtree-search.js"]
+      "js": ["MIGCore.js", "site-gumtree-search.js"]
     },
     {
       "matches": ["*://*.gumtree.com.au/s-ad/*"],
-      "js": ["site-gumtree-ad.js"]
+      "js": ["MIGCore.js", "site-gumtree-ad.js"]
     }
   ]
 }
