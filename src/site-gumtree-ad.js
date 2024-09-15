@@ -13,10 +13,7 @@ function onGot(item) {
   console.debug(item["api_key"]);
 
   console.log(`Extension ${manifest.name} v${manifest.version} starting...`);
-  gumtreeReplaceTextByClass(
-    item["api_key"],
-    "vip-ad-title__header",
-  );
+  gumtreeReplaceTextByClass(item["api_key"], "vip-ad-title__header");
 }
 
 function onError(error) {
@@ -77,32 +74,33 @@ async function gumtreeReplaceTextByClass(apiKey, className) {
   let elements = document.getElementsByClassName(className);
   let tasks = [];
 
-    let adTitle = elements[0].textContent + "\n";
-    let adDescription = document.getElementsByClassName("vip-ad-description__content--wrapped")[0]
-        
-    // Combine the two elements for our prompt
-    let gptPromptAdText = adTitle + adDescription;
+  let adTitle = elements[0].textContent + "\n";
+  let adDescription = document.getElementsByClassName(
+    "vip-ad-description__content--wrapped",
+  )[0];
 
-    // Send to GPT for analysis
-    tasks.push(
-        GPTFetchMonitorModel(apiKey, gptPromptAdText).then(
-        async function (value) {
-            console.log("Calling func retrieved model number: " + value);
-            // Search RTINGS API for monitor model
-            let result = await RTINGSSearch(value);
-            if (result) {
-            elements[0].textContent =
-                "[[ " + result + " ]] -- " + elements[0].textContent;
-            }
-        },
-        function (error) {
-            console.log("Calling func error: " + error);
-        },
-        ),
-    );
+  // Combine the two elements for our prompt
+  let gptPromptAdText = adTitle + adDescription;
 
-    console.debug("Adding another task...");
+  // Send to GPT for analysis
+  tasks.push(
+    GPTFetchMonitorModel(apiKey, gptPromptAdText).then(
+      async function (value) {
+        console.log("Calling func retrieved model number: " + value);
+        // Search RTINGS API for monitor model
+        let result = await RTINGSSearch(value);
+        if (result) {
+          elements[0].textContent =
+            "[[ " + result + " ]] -- " + elements[0].textContent;
+        }
+      },
+      function (error) {
+        console.log("Calling func error: " + error);
+      },
+    ),
+  );
 
+  console.debug("Adding another task...");
 
   // Wait for all API calls to complete
   await Promise.all(tasks);
