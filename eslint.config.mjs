@@ -8,6 +8,9 @@ export default [
       globals: {
         ...globals.browser,
         browser: "readonly",
+        manifest: "readonly",
+        GPTFetchMonitorModel: "readonly",
+        RTINGSSearch: "readonly",
       },
     },
   },

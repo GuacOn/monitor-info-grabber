@@ -1,3 +1,5 @@
+/*eslint no-unused-vars: "off"*/
+
 const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
 const PROMPT_PREFIX =
   "Extract and return just the model of the monitor from the advertisement text below. Tip: the model number will contain no spaces, and at least one letter and one number. If there is no model number, say 'no'.\n\n";
