@@ -116,19 +116,23 @@ async function RTINGSExtractScorecard(url) {
     const className = "scorecard-table";
     var scorecardtable = doc.getElementsByClassName(className)[0];
 
-    var scorecard = {}
+    var scorecard = {};
     for (let row = 0; row < scorecardtable.children.length; row++) {
       // For each scorecard row
 
       // var aspect = elements[i].textContent.trim()
-      var aspect = scorecardtable.children[row].getElementsByClassName("scorecard-row-name")[0].textContent.trim(); // grab name
-      var score  = scorecardtable.children[row].getElementsByClassName("e-score_box-value")[0].textContent.trim(); // grab name
+      var aspect = scorecardtable.children[row]
+        .getElementsByClassName("scorecard-row-name")[0]
+        .textContent.trim(); // grab name
+      var score = scorecardtable.children[row]
+        .getElementsByClassName("e-score_box-value")[0]
+        .textContent.trim(); // grab name
       // var score = elements[i].previousElementSibling.childNodes[1].textContent //grab score
 
-      scorecard[aspect] = score
+      scorecard[aspect] = score;
     }
 
-    console.debug(scorecard)
+    console.debug(scorecard);
     return scorecard;
   } catch (error) {
     console.error("There was a problem with the fetch operation:", error);
@@ -137,18 +141,18 @@ async function RTINGSExtractScorecard(url) {
 
 /**
  * Turns our scorecard array into a HTML table
- * @param {Object} scorecard 
+ * @param {Object} scorecard
  */
 function createHTMLTable(scorecard) {
   const newTable = document.createElement("table");
   newTable.innerHTML = "<thead><th>Aspect</th><th>Score</th></thead>";
 
-  for(var score of Object.keys(scorecard)){
+  for (var score of Object.keys(scorecard)) {
     const newRow = document.createElement("tr");
     const tdAspect = document.createElement("td");
     const tdScore = document.createElement("td");
     tdAspect.textContent = score;
-    tdScore.textContent = scorecard[score];    
+    tdScore.textContent = scorecard[score];
     newRow.appendChild(tdAspect);
     newRow.appendChild(tdScore);
     newTable.appendChild(newRow);
