@@ -90,7 +90,7 @@ async function RTINGSSearch(monitorModel) {
         console.debug("Found match!");
 
         // Extract the information we are interested in, and return it
-        let score = await RTINGSExtractInfo(searchResult.url);
+        let score = await RTINGSExtractScorecard(searchResult.url);
         return score;
       }
     }
@@ -103,7 +103,7 @@ async function RTINGSSearch(monitorModel) {
  * RTINGS review pages have an easy-to-read scorecard (e.g. https://www.rtings.com/monitor/reviews/lg/27gl850-b-27gl83a-b). We want to parse this, and return it in a dictionary for later use (customisable display options).
  * @param {string} url URL (excluding hostname) of the search result
  */
-async function RTINGSExtractInfo(url) {
+async function RTINGSExtractScorecard(url) {
   console.debug("Grabbing monitor details from url: " + url);
   try {
     const response = await fetch("https://www.rtings.com" + url);
@@ -112,25 +112,25 @@ async function RTINGSExtractInfo(url) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
 
-    const className = "scorecard-row-name";
-    var elements = doc.getElementsByClassName(className);
+    const className = "scorecard-table";
+    var scorecardtable = doc.getElementsByClassName(className)[0];
 
-    for (let i = 0; i < elements.length; i++) {
-      if (elements[i].textContent.includes("Color Accuracy")) {
-        return (
-          "CA: " + elements[i].previousElementSibling.childNodes[1].textContent
-        );
-      } else if (elements[i].textContent.includes("SDR Picture")) {
-        return (
-          "SDR: " + elements[i].previousElementSibling.childNodes[1].textContent
-        );
-      } else if (elements[i].textContent.includes("Media Creation")) {
-        return (
-          "MC: " + elements[i].previousElementSibling.childNodes[1].textContent
-        );
-      }
+    var scorecard = {}
+    for (let row = 0; row < scorecardtable.children.length; row++) {
+      // For each scorecard row
+
+      // var aspect = elements[i].textContent.trim()
+      var aspect = scorecardtable.children[row].getElementsByClassName("scorecard-row-name")[0].textContent.trim(); // grab name
+      var score  = scorecardtable.children[row].getElementsByClassName("e-score_box-value")[0].textContent.trim(); // grab name
+      // var score = elements[i].previousElementSibling.childNodes[1].textContent //grab score
+
+      scorecard[aspect] = score
     }
+
+    console.debug(scorecard)
+    return scorecard;
   } catch (error) {
     console.error("There was a problem with the fetch operation:", error);
   }
 }
+
