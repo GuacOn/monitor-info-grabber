@@ -8,7 +8,8 @@
     "storage",
     "*://*.gumtree.com.au/s-monitors/*",
     "https://api.openai.com/v1/chat/completions",
-    "https://www.rtings.com/search"
+    "https://www.rtings.com/search",
+    "*://*.reddit.com/r/hardwareswap/comments/*"
   ],
   "icons": {
     "96": "icons/border-96.png"
@@ -25,6 +26,10 @@
     {
       "matches": ["*://*.gumtree.com.au/s-ad/*"],
       "js": ["MIGCore.js", "site-gumtree-ad.js"]
+    },
+    {
+      "matches": ["*://*.reddit.com/r/hardwareswap/comments/*"],
+      "js": ["MIGCore.js", "site-reddit-hardwareswap-post.js"]
     }
   ]
 }
