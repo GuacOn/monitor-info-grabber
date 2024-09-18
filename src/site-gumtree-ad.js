@@ -29,6 +29,19 @@ async function gumtreeReplaceTextByClass(apiKey, className) {
   // Combine the two elements for our prompt
   let gptPromptAdText = adTitle + adDescription;
 
+  const popupDiv = document.createElement("div");
+  popupDiv.style.display = 'none';
+  popupDiv.style.position = 'relative';
+  popupDiv.style.top = '30px';
+  popupDiv.style.left = '7px';
+  popupDiv.style.backgroundColor = '#555';
+  popupDiv.style.color = '#fff';
+  popupDiv.style.padding = '8px';
+  popupDiv.style.borderRadius = '5px;';
+
+  // const node = document.createTextNode("This is a new paragraph.");
+  // popupDiv.appendChild(node);
+
   // Send to GPT for analysis
   tasks.push(
     GPTFetchMonitorModel(apiKey, gptPromptAdText).then(
@@ -37,9 +50,26 @@ async function gumtreeReplaceTextByClass(apiKey, className) {
         // Search RTINGS API for monitor model
         let result = await RTINGSSearch(value);
         if (result) {
+          // Add HTML scorecard table to our popupDiv
+          popupDiv.appendChild(result)
+
+          // Make ad title hover-able
+          const elementToHover = elements[0];
+          elements[0].appendChild(popupDiv);
+          const elementToPopup = popupDiv;
+
+          elementToHover.addEventListener('mouseenter',() => {
+                  elementToPopup.style.display = 'block';
+              });
+
+          elementToHover.addEventListener('mouseleave',() => {
+                  elementToPopup.style.display = 'none';
+              });
+          
+
           // Replace ad title with retrieved data
-          elements[0].textContent =
-            "[[ " + result + " ]] -- " + elements[0].textContent;
+          // elements[0].textContent =
+          //   "[[ " + result + " ]] -- " + elements[0].textContent;
         }
       },
       function (error) {

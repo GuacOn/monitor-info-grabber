@@ -90,8 +90,9 @@ async function RTINGSSearch(monitorModel) {
         console.debug("Found match!");
 
         // Extract the information we are interested in, and return it
-        let score = await RTINGSExtractScorecard(searchResult.url);
-        return score;
+        let scorecard = await RTINGSExtractScorecard(searchResult.url);
+        let HTMLTable = createHTMLTable(scorecard);
+        return HTMLTable;
       }
     }
   } catch (error) {
@@ -134,3 +135,24 @@ async function RTINGSExtractScorecard(url) {
   }
 }
 
+/**
+ * Turns our scorecard array into a HTML table
+ * @param {Object} scorecard 
+ */
+function createHTMLTable(scorecard) {
+  const newTable = document.createElement("table");
+  newTable.innerHTML = "<thead><th>Aspect</th><th>Score</th></thead>";
+
+  for(var score of Object.keys(scorecard)){
+    const newRow = document.createElement("tr");
+    const tdAspect = document.createElement("td");
+    const tdScore = document.createElement("td");
+    tdAspect.textContent = score;
+    tdScore.textContent = scorecard[score];    
+    newRow.appendChild(tdAspect);
+    newRow.appendChild(tdScore);
+    newTable.appendChild(newRow);
+  }
+
+  return newTable;
+}
