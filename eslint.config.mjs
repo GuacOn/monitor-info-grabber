@@ -12,6 +12,8 @@ export default [
         manifest: "readonly",
         GPTFetchMonitorModel: "readonly",
         RTINGSSearch: "readonly",
+        setupHover: "readonly",
+        popupDiv: "readonly",
       },
     },
   },

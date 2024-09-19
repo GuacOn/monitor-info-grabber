@@ -9,6 +9,17 @@ const RTINGS_API_URL =
 
 const manifest = browser.runtime.getManifest();
 
+// Div that will contain the scorecard popup when hovering over link
+const popupDiv = document.createElement("div");
+popupDiv.style.display = "none";
+popupDiv.style.position = "relative";
+popupDiv.style.top = "30px";
+popupDiv.style.left = "7px";
+popupDiv.style.backgroundColor = "#555";
+popupDiv.style.color = "#fff";
+popupDiv.style.padding = "8px";
+popupDiv.style.borderRadius = "5px;";
+
 /**
  * Sends string (ad title + description) to GPT to analyse, returns just the
  * monitor model number.
@@ -159,4 +170,47 @@ function createHTMLTable(scorecard) {
   }
 
   return newTable;
+}
+
+/**
+ * Replaces text with a hoverable link that will show a popup with the scorecard table
+ * @param {Element} elementToHover HTML
+ * @param {Element} popupElement
+ * @param {string} modelNumber
+ */
+async function setupHover(elementToHover, popupElement, modelNumber) {
+  // Function to handle hover functionality
+  const escapeRegExp = (string) =>
+    string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  // Create a link element
+  const linkElement = document.createElement("a");
+  linkElement.className = "modelLink";
+  linkElement.href = "rtings.com";
+  linkElement.innerHTML = modelNumber;
+  linkElement.style.cursor = "pointer"; // Optional: Change cursor to pointer
+  linkElement.style.textDecoration = "underline"; // Optional: Underline link
+
+  // Replace modelNumber in the innerHTML with the link element
+  elementToHover.innerHTML = elementToHover.innerHTML.replace(
+    new RegExp(escapeRegExp(modelNumber), "i"),
+    linkElement.outerHTML
+  );
+
+  // Append the popup element
+  elementToHover.appendChild(popupElement);
+  popupElement.style.display = "none"; // Initially hide the popup
+
+  // Add event listeners to the link element
+  elementToHover
+    .getElementsByClassName("modelLink")[0]
+    .addEventListener("mouseenter", () => {
+      popupElement.style.display = "block";
+    });
+
+  elementToHover
+    .getElementsByClassName("modelLink")[0]
+    .addEventListener("mouseleave", () => {
+      popupElement.style.display = "none";
+    });
 }
