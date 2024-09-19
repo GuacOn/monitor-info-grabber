@@ -179,7 +179,7 @@ async function setupHover(elementToHover, popupElement, modelNumber) {
   let linkElement = document.createElement("a");
   linkElement.className = hashCode(elementToHover.className + modelNumber);
   linkElement.href = "rtings.com";
-  linkElement.innerHTML = modelNumber;
+  linkElement.textContent = modelNumber;
   linkElement.style.cursor = "pointer"; // Optional: Change cursor to pointer
   linkElement.style.textDecoration = "underline"; // Optional: Underline link
 
