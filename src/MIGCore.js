@@ -10,15 +10,7 @@ const RTINGS_API_URL =
 const manifest = browser.runtime.getManifest();
 
 // Div that will contain the scorecard popup when hovering over link
-const popupDiv = document.createElement("div");
-popupDiv.style.display = "none";
-popupDiv.style.position = "relative";
-popupDiv.style.top = "30px";
-popupDiv.style.left = "7px";
-popupDiv.style.backgroundColor = "#555";
-popupDiv.style.color = "#fff";
-popupDiv.style.padding = "8px";
-popupDiv.style.borderRadius = "5px;";
+const popupDivs = [];
 
 /**
  * Sends string (ad title + description) to GPT to analyse, returns just the
@@ -184,33 +176,44 @@ async function setupHover(elementToHover, popupElement, modelNumber) {
     string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
   // Create a link element
-  const linkElement = document.createElement("a");
-  linkElement.className = "modelLink";
+  let linkElement = document.createElement("a");
+  linkElement.className = hashCode(elementToHover.className + modelNumber);
   linkElement.href = "rtings.com";
   linkElement.innerHTML = modelNumber;
   linkElement.style.cursor = "pointer"; // Optional: Change cursor to pointer
   linkElement.style.textDecoration = "underline"; // Optional: Underline link
 
   // Replace modelNumber in the innerHTML with the link element
-  elementToHover.innerHTML = elementToHover.innerHTML.replace(
-    new RegExp(escapeRegExp(modelNumber), "i"),
-    linkElement.outerHTML
-  );
+  // elementToHover.innerHTML = elementToHover.innerHTML.replace(
+  //   new RegExp(escapeRegExp(modelNumber), "i"),
+  //   linkElement.outerHTML
+  // );
+  elementToHover.insertAdjacentElement("afterbegin", linkElement);
+  linkElement.insertAdjacentHTML("afterbegin", "<br />");
+
+  let pClone = popupElement.cloneNode(true);
 
   // Append the popup element
-  elementToHover.appendChild(popupElement);
-  popupElement.style.display = "none"; // Initially hide the popup
+  elementToHover.appendChild(pClone);
+  pClone.style.display = "none"; // Initially hide the popup
 
   // Add event listeners to the link element
-  elementToHover
-    .getElementsByClassName("modelLink")[0]
-    .addEventListener("mouseenter", () => {
-      popupElement.style.display = "block";
-    });
+  let linkEle = elementToHover.getElementsByClassName(linkElement.className)[0];
+  linkEle.addEventListener("mouseenter", () => {
+    pClone.style.display = "block";
+  });
 
-  elementToHover
-    .getElementsByClassName("modelLink")[0]
-    .addEventListener("mouseleave", () => {
-      popupElement.style.display = "none";
-    });
+  linkEle.addEventListener("mouseleave", () => {
+    pClone.style.display = "none";
+  });
+}
+
+function hashCode(str) {
+  let hash = 0;
+  for (let i = 0, len = str.length; i < len; i++) {
+    let chr = str.charCodeAt(i);
+    hash = (hash << 5) - hash + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
 }

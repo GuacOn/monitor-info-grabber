@@ -14,6 +14,7 @@ export default [
         RTINGSSearch: "readonly",
         setupHover: "readonly",
         popupDiv: "readonly",
+        popupDivs: "readonly",
       },
     },
   },
