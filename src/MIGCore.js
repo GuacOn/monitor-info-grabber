@@ -189,7 +189,7 @@ async function setupHover(elementToHover, popupElement, modelNumber) {
   //   linkElement.outerHTML
   // );
   elementToHover.insertAdjacentElement("afterbegin", linkElement);
-  linkElement.insertAdjacentHTML("afterbegin", "<br />");
+  linkElement.insertAdjacentHTML("afterbegin", "<br />  ");
 
   let pClone = popupElement.cloneNode(true);
 

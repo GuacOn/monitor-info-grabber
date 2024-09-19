@@ -4,11 +4,11 @@ function onGot(item) {
   console.debug(item["api_key"]);
 
   console.log(`Extension ${manifest.name} v${manifest.version} starting...`);
-  const elementsList = [
-    "vip-ad-title__header",
-    "vip-ad-description__content--wrapped",
+  const elementsArray = [
+    document.getElementsByClassName("vip-ad-title__header")[0],
+    document.getElementsByClassName("vip-ad-description__content--wrapped")[0],
   ];
-  modifyPage(item["api_key"], elementsList);
+  modifyPage(item["api_key"], elementsArray);
 }
 
 function onError(error) {
@@ -19,9 +19,9 @@ function onError(error) {
 /**
  * Takes a list of HTML element class names (usually ad title + description), concatenates the textContent for GPT, then supplements any monitor models found with RTINGS review data.
  * @param {string} apiKey OpenAI API key (https://platform.openai.com/api-keys)
- * @param {Array} elementsList Name of the class we will add information to
+ * @param {Array} elementsArray Name of the class we will add information to
  */
-async function modifyPage(apiKey, elementsList) {
+async function modifyPage(apiKey, elementsArray) {
   // let elements = document.getElementsByClassName(className);
   let tasks = [];
 
@@ -33,9 +33,9 @@ async function modifyPage(apiKey, elementsList) {
   let gptPromptAdText = "";
 
   let i = 0;
-  while (i < elementsList.length) {
+  while (i < elementsArray.length) {
     gptPromptAdText = gptPromptAdText.concat(
-      document.getElementsByClassName(elementsList[i])[0].textContent + "\n"
+      elementsArray[i].textContent + "\n"
     );
     i++;
   }
@@ -46,20 +46,38 @@ async function modifyPage(apiKey, elementsList) {
       async function (modelNumber) {
         console.log("Calling func retrieved model number: " + modelNumber);
 
-        // Search RTINGS API for monitor model
-        let HTMLScorecardTable = await RTINGSSearch(modelNumber);
-        if (HTMLScorecardTable) {
-          // Add HTML scorecard table to our popupDiv
-          popupDiv.appendChild(HTMLScorecardTable);
+        // For each unique model found
+        for (i = 0; i < modelNumber.split(", ").length; i++) {
+          let model = modelNumber.split(", ")[i];
 
-          elementsList.forEach((className) => {
-            let popupDivClone = popupDiv.cloneNode(true);
+          // Search RTINGS API for monitor model
+          let HTMLScorecardTable = await RTINGSSearch(model);
+          if (HTMLScorecardTable) {
+            // If model found
+            // Create our scorecard popup (unique per model)
+            let popupDiv = document.createElement("div");
+            popupDiv.style.display = "none";
+            popupDiv.style.fontSize = "14px";
+            popupDiv.style.position = "relative";
+            popupDiv.style.top = "30px";
+            popupDiv.style.left = "7px";
+            popupDiv.style.backgroundColor = "#555";
+            popupDiv.style.color = "#fff";
+            popupDiv.style.padding = "8px";
+            popupDiv.style.borderRadius = "5px;";
 
-            const elements = document.getElementsByClassName(className);
-            for (let i = 0; i < elements.length; i++) {
-              setupHover(elements[i], popupDivClone, modelNumber);
-            }
-          });
+            popupDivs[i] = popupDiv;
+
+            // Add HTML scorecard table to our popupDiv
+            popupDivs[i].appendChild(HTMLScorecardTable);
+
+            elementsArray.forEach((element) => {
+              // const elements = document.getElementsByClassName(className);
+              // for (let i = 0; i < elements.length; i++) {
+              setupHover(element, popupDivs[i], model);
+              // }
+            });
+          }
         }
       },
       function (error) {
