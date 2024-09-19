@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Monitor Info Grabber",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Uses AI to supplement listings for used monitors with information from the Rtings review site.",
   "permissions": [
     "activeTab",
