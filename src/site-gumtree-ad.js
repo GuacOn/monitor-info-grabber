@@ -24,7 +24,7 @@ async function gumtreeReplaceTextByClass(apiKey, className) {
   let adTitleElement = elements[0];
   let adTitleText = adTitleElement.textContent + "\n";
   let adDescriptionElement = document.getElementsByClassName(
-    "vip-ad-description__content--wrapped",
+    "vip-ad-description__content--wrapped"
   )[0];
 
   // Combine the two elements for our prompt
@@ -48,52 +48,62 @@ async function gumtreeReplaceTextByClass(apiKey, className) {
     GPTFetchMonitorModel(apiKey, gptPromptAdText).then(
       async function (modelNumber) {
         console.log("Calling func retrieved model number: " + modelNumber);
+
         // Search RTINGS API for monitor model
         let HTMLScorecardTable = await RTINGSSearch(modelNumber);
         if (HTMLScorecardTable) {
           // Add HTML scorecard table to our popupDiv
           popupDiv.appendChild(HTMLScorecardTable);
-          let popupDivDesc = popupDiv.cloneNode(true);
 
-          // Make ad title hover-able
-          const elementToHover = adTitleElement;
-          elementToHover.innerHTML = elementToHover.innerHTML.replace(
-            modelNumber,
-            `<a href="rtings.com">${modelNumber}</a>`,
-          );
-          adTitleElement.appendChild(popupDiv);
-          const elementToPopup = popupDiv;
+          // Function to handle hover functionality
+          const setupHover = (elementToHover, popupElement) => {
+            const escapeRegExp = (string) =>
+              string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-          elementToHover.addEventListener("mouseenter", () => {
-            elementToPopup.style.display = "block";
-          });
+            // Create a link element
+            const linkElement = document.createElement("a");
+            linkElement.className = "modelLink";
+            linkElement.href = "rtings.com";
+            linkElement.innerHTML = modelNumber;
+            linkElement.style.cursor = "pointer"; // Optional: Change cursor to pointer
+            linkElement.style.textDecoration = "underline"; // Optional: Underline link
 
-          elementToHover.addEventListener("mouseleave", () => {
-            elementToPopup.style.display = "none";
-          });
+            // Replace modelNumber in the innerHTML with the link element
+            elementToHover.innerHTML = elementToHover.innerHTML.replace(
+              new RegExp(escapeRegExp(modelNumber), "i"),
+              linkElement.outerHTML
+            );
 
-          // Make ad description hover-able
-          const elementToHoverDesc = adDescriptionElement;
-          elementToHoverDesc.innerHTML = elementToHoverDesc.innerHTML.replace(
-            modelNumber,
-            `<a href="rtings.com">${modelNumber}</a>`,
-          );
-          adDescriptionElement.appendChild(popupDivDesc);
-          const elementToPopupDesc = popupDivDesc;
+            // Append the popup element
+            elementToHover.appendChild(popupElement);
+            popupElement.style.display = "none"; // Initially hide the popup
 
-          elementToHoverDesc.addEventListener("mouseenter", () => {
-            elementToPopupDesc.style.display = "block";
-          });
+            // Add event listeners to the link element
+            elementToHover
+              .getElementsByClassName("modelLink")[0]
+              .addEventListener("mouseenter", () => {
+                popupElement.style.display = "block";
+              });
 
-          elementToHoverDesc.addEventListener("mouseleave", () => {
-            elementToPopupDesc.style.display = "none";
-          });
+            elementToHover
+              .getElementsByClassName("modelLink")[0]
+              .addEventListener("mouseleave", () => {
+                popupElement.style.display = "none";
+              });
+          };
+
+          // Set up hover for the title
+          setupHover(adTitleElement, popupDiv);
+
+          // Set up hover for the description
+          const popupDivDesc = popupDiv.cloneNode(true);
+          setupHover(adDescriptionElement, popupDivDesc);
         }
       },
       function (error) {
         console.log("Calling func error: " + error);
-      },
-    ),
+      }
+    )
   );
 
   console.debug("Adding another task...");
