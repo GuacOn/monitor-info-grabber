@@ -6,7 +6,7 @@ function onGot(item) {
   console.log(`Extension ${manifest.name} v${manifest.version} starting...`);
   gumtreeReplaceTextByClass(
     item["api_key"],
-    "user-ad-row-new-design__title-span",
+    "user-ad-row-new-design__title-span"
   );
 }
 
@@ -39,17 +39,38 @@ async function gumtreeReplaceTextByClass(apiKey, className) {
       GPTFetchMonitorModel(apiKey, gptPromptAdText).then(
         async function (value) {
           console.log("Calling func retrieved model number: " + value);
+
           // Search RTINGS API for monitor model
-          let result = await RTINGSSearch(value);
-          if (result) {
-            elements[i].textContent =
-              "[[ " + result + " ]] -- " + elements[i].textContent;
+          let HTMLScorecardTable = await RTINGSSearch(value);
+          if (HTMLScorecardTable) {
+            // If model found
+            // Create our scorecard popup (unique per model)
+            let popupDiv = document.createElement("div");
+            popupDiv.style.display = "none";
+            popupDiv.style.fontSize = "14px";
+            popupDiv.style.position = "relative";
+            popupDiv.style.top = "30px";
+            popupDiv.style.left = "7px";
+            popupDiv.style.backgroundColor = "#555";
+            popupDiv.style.color = "#fff";
+            popupDiv.style.padding = "8px";
+            popupDiv.style.borderRadius = "5px;";
+
+            popupDivs[i] = popupDiv;
+
+            // Add HTML scorecard table to our popupDiv
+            popupDivs[i].appendChild(HTMLScorecardTable);
+
+            // const elements = document.getElementsByClassName(className);
+            // for (let i = 0; i < elements.length; i++) {
+            setupHover(elements[i], popupDivs[i], value);
+            // }
           }
         },
         function (error) {
           console.log("Calling func error: " + error);
-        },
-      ),
+        }
+      )
     );
 
     console.debug("Adding another task...");

@@ -1,14 +1,15 @@
 {
   "manifest_version": 2,
   "name": "Monitor Info Grabber",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Uses AI to supplement listings for used monitors with information from the Rtings review site.",
   "permissions": [
     "activeTab",
     "storage",
     "*://*.gumtree.com.au/s-monitors/*",
     "https://api.openai.com/v1/chat/completions",
-    "https://www.rtings.com/search"
+    "https://www.rtings.com/search",
+    "*://*.reddit.com/r/hardwareswap/comments/*"
   ],
   "icons": {
     "96": "icons/border-96.png"
@@ -25,6 +26,10 @@
     {
       "matches": ["*://*.gumtree.com.au/s-ad/*"],
       "js": ["MIGCore.js", "site-gumtree-ad.js"]
+    },
+    {
+      "matches": ["*://*.reddit.com/r/hardwareswap/comments/*"],
+      "js": ["MIGCore.js", "site-reddit-hardwareswap-post.js"]
     }
   ]
 }

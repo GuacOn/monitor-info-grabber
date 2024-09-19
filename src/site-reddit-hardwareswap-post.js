@@ -4,11 +4,12 @@ function onGot(item) {
   console.debug(item["api_key"]);
 
   console.log(`Extension ${manifest.name} v${manifest.version} starting...`);
-  const elementsArray = [
-    document.getElementsByClassName("vip-ad-title__header")[0],
-    document.getElementsByClassName("vip-ad-description__content--wrapped")[0],
-  ];
-  modifyPage(item["api_key"], elementsArray);
+
+  // Using the unique names in slot for this reddit page
+  var title = document.querySelectorAll("[id^=post-title]")[0];
+  var body = document.querySelectorAll("[id$=post-rtjson-content]")[0];
+  const elementsList = [title, body];
+  modifyPage(item["api_key"], elementsList);
 }
 
 function onError(error) {
