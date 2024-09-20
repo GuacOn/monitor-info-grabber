@@ -1,36 +1,20 @@
-let apiKey = browser.storage.local.get("api_key");
-apiKey.then(onGot, onError);
-function onGot(item) {
-  console.debug(item["api_key"]);
-
-  console.log(`Extension ${manifest.name} v${manifest.version} starting...`);
-  gumtreeReplaceTextByClass(
-    item["api_key"],
-    "user-ad-row-new-design__title-span"
-  );
-}
-
-function onError(error) {
-  alert("Please set your OpenAI API key in the extension settings.");
-  console.log(`Error: ${error}`);
-}
+// Description: Loaded on the Gumtree search page 
 
 /**
  * For each ad result, queries ad text + description, and supplements ad title with RTINGS data.
- * @param {string} apiKey OpenAI API key (https://platform.openai.com/api-keys)
- * @param {string} className Name of the class we will add information to
  */
-async function gumtreeReplaceTextByClass(apiKey, className) {
+// @ts-ignore
+async function modifyPage(apiKey: string) {
+  let className = "user-ad-row-new-design__title-span";
   let elements = document.getElementsByClassName(className);
   let tasks = [];
 
   for (let i = 0; i < elements.length; i++) {
     // for each ad element
     let adTitle = elements[i].textContent + "\n";
-    let adDescription =
-      elements[i].parentElement.nextElementSibling.nextElementSibling
-        .children[0].textContent;
-
+    let adDescriptionElement = elements[i].parentElement?.nextElementSibling?.nextElementSibling?.children[0];
+    let adDescription: string = adDescriptionElement?.textContent ?? '';
+ 
     // Combine the two elements for our prompt
     let gptPromptAdText = adTitle + adDescription;
 
@@ -63,7 +47,7 @@ async function gumtreeReplaceTextByClass(apiKey, className) {
 
             // const elements = document.getElementsByClassName(className);
             // for (let i = 0; i < elements.length; i++) {
-            setupHover(elements[i], popupDivs[i], value);
+            setupHover(elements[i] as HTMLElement, popupDivs[i], value);
             // }
           }
         },

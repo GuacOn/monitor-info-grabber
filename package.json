@@ -1,10 +1,15 @@
 {
   "name": "monitor-info-grabber",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "",
   "scripts": {
+    "setup": "npm i",
+    "build": "tsc && npm run copy-files",
+    "rebuild": "npm run clean && npm i && tsc && npm run copy-files",
+    "clean": "npx rimraf built node_modules package-lock.json",
+    "copy-files": "npx copyfiles -e src/*.ts -u 1 -s src/* src/icons/* built/",
     "lint": "eslint eslint.config.mjs",
-    "fix": "yarn format && yarn lint:fix",
+    "fix": "npm run format && npm run lint:fix",
     "format": "prettier --write 'src/*.{js,jsx,ts,tsx}'",
     "lint:fix": "eslint --fix 'src/*.{js,jsx,ts,tsx}'",
     "fix:eslint": "eslint src --ext .js,.ts,.jsx,.tsx --fix",
@@ -17,11 +22,15 @@
   },
   "author": "",
   "devDependencies": {
+    "@types/firefox-webext-browser": "^120.0.4",
+    "@types/node": "20.0.0",
+    "copyfiles": "^2.4.1",
     "eslint": "^9.10.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "husky": "^9.1.6",
     "lint-staged": "^15.2.10",
-    "prettier": "^3.3.3"
+    "prettier": "^3.3.3",
+    "rimraf": "^6.0.1"
   }
 }
