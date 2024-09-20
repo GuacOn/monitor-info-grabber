@@ -1,37 +1,20 @@
-let apiKey = browser.storage.local.get("api_key");
-apiKey.then(onGot, onError);
-function onGot(item) {
-  console.debug(item["api_key"]);
-
-  console.log(`Extension ${manifest.name} v${manifest.version} starting...`);
-
-  // Using the unique names in slot for this reddit page
-  var title = document.querySelectorAll("[id^=post-title]")[0];
-  var body = document.querySelectorAll("[id$=post-rtjson-content]")[0];
-  const elementsList = [title, body];
-  modifyPage(item["api_key"], elementsList);
-}
-
-function onError(error) {
-  alert("Please set your OpenAI API key in the extension settings.");
-  console.log(`Error: ${error}`);
-}
+// Description: Gumtree specific ad page modifications.
 
 /**
  * Takes a list of HTML element class names (usually ad title + description), concatenates the textContent for GPT, then supplements any monitor models found with RTINGS review data.
  * @param {string} apiKey OpenAI API key (https://platform.openai.com/api-keys)
- * @param {Array} elementsArray Name of the class we will add information to
  */
-async function modifyPage(apiKey, elementsArray) {
-  // let elements = document.getElementsByClassName(className);
+// @ts-ignore
+async function modifyPage(apiKey: string): Promise<void> {
+  const elementsArray: Element[] = [
+    document.getElementsByClassName("vip-ad-title__header")[0],
+    document.getElementsByClassName("vip-ad-description__content--wrapped")[0],
+  ];
+
   let tasks = [];
 
-  // let adTitleElement = elements[0];
-  // let adTitleText = adTitleElement.textContent + "\n";
-  // let adDescriptionElement = document.getElementsByClassName("")[0];
-
   // Retrieve textContent of all given elements for GPT prompt
-  let gptPromptAdText = "";
+  let gptPromptAdText: string = "";
 
   let i = 0;
   while (i < elementsArray.length) {
@@ -49,7 +32,7 @@ async function modifyPage(apiKey, elementsArray) {
 
         // For each unique model found
         for (i = 0; i < modelNumber.split(", ").length; i++) {
-          let model = modelNumber.split(", ")[i];
+          let model: string = modelNumber.split(", ")[i];
 
           // Search RTINGS API for monitor model
           let HTMLScorecardTable = await RTINGSSearch(model);
@@ -75,7 +58,7 @@ async function modifyPage(apiKey, elementsArray) {
             elementsArray.forEach((element) => {
               // const elements = document.getElementsByClassName(className);
               // for (let i = 0; i < elements.length; i++) {
-              setupHover(element, popupDivs[i], model);
+              setupHover(element as HTMLElement, popupDivs[i], model);
               // }
             });
           }

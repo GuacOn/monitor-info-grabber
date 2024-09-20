@@ -1,16 +1,38 @@
 /*eslint no-unused-vars: "off"*/
 
-const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
-const PROMPT_PREFIX =
+const OPENAI_API_URL: URL = new URL(
+  "https://api.openai.com/v1/chat/completions"
+);
+const PROMPT_PREFIX: string =
   "Extract and return just the model of the monitor from the advertisement text below. Tip: the model number will contain no spaces, and at least one letter and one number. If there is no model number, say 'no'.\n\n";
 
-const RTINGS_API_URL =
-  "https://www.rtings.com/api/v2/safe/app/search__search_results";
+const RTINGS_API_URL: URL = new URL(
+  "https://www.rtings.com/api/v2/safe/app/search__search_results"
+);
 
 const manifest = browser.runtime.getManifest();
 
+// Check if API key is set
+const apiKey = browser.storage.local.get("api_key");
+
+apiKey.then(onGot, onError);
+function onGot(item: { [key: string]: string }) {
+  console.debug(item["api_key"]);
+
+  console.log(`Extension ${manifest.name} v${manifest.version} starting...`);
+
+  // Start modifying the page
+  modifyPage(item["api_key"]);
+}
+
+// No API key set, alert user
+function onError(error: any) {
+  alert("Please set your OpenAI API key in the extension settings.");
+  console.log(`Error: ${error}`);
+}
+
 // Div that will contain the scorecard popup when hovering over link
-const popupDivs = [];
+const popupDivs: HTMLDivElement[] = [];
 
 /**
  * Sends string (ad title + description) to GPT to analyse, returns just the
@@ -18,13 +40,16 @@ const popupDivs = [];
  * @param {string} apiKey OpenAI API key (https://platform.openai.com/api-keys)
  * @param {string} promptText Advertisement text to send to GPT for analysis
  */
-async function GPTFetchMonitorModel(apiKey, promptText) {
+async function GPTFetchMonitorModel(
+  apiKey: string,
+  promptText: string
+): Promise<string> {
   try {
-    const prompt = PROMPT_PREFIX + promptText;
+    const prompt: string = PROMPT_PREFIX + promptText;
 
     console.debug("Fetching model number using GPT, with prompt: " + prompt);
 
-    const requestOptions = {
+    const requestOptions: any = {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -46,13 +71,14 @@ async function GPTFetchMonitorModel(apiKey, promptText) {
     const data = await response.json();
 
     // Extract model number from returned data
-    const modelNumber = data.choices[0].message.content;
+    const modelNumber: string = data.choices[0].message.content;
 
     console.debug("Found model number: " + modelNumber);
 
     return modelNumber;
   } catch (error) {
     console.error("There was a problem with the fetch operation:", error);
+    throw error;
   }
 }
 
@@ -60,7 +86,9 @@ async function GPTFetchMonitorModel(apiKey, promptText) {
  * RTINGS has a search API which we can use to query for our found monitor model number.
  * @param {string} monitorModel Model name of the monitor we are looking for
  */
-async function RTINGSSearch(monitorModel) {
+async function RTINGSSearch(
+  monitorModel: string
+): Promise<HTMLElement | undefined> {
   console.debug("Searching RTINGS for model: " + monitorModel);
   try {
     const requestOptions = {
@@ -76,13 +104,14 @@ async function RTINGSSearch(monitorModel) {
       }),
     };
 
-    // Send query
+    // Send query and await search results
     const response = await fetch(RTINGS_API_URL, requestOptions);
     const data = await response.json();
+    const searchResults: Array<any> = data.data.search_results.results;
 
     // For each search result
-    for (let i = 0; i < data.data.search_results.results.length; i++) {
-      let searchResult = data.data.search_results.results[i];
+    for (let i = 0; i < searchResults.length; i++) {
+      let searchResult = searchResults[i];
 
       if (
         // Convert search result model + advertisement model to lowercase for comparison
@@ -100,6 +129,7 @@ async function RTINGSSearch(monitorModel) {
     }
   } catch (error) {
     console.error("There was a problem with the fetch operation:", error);
+    throw error;
   }
 }
 
@@ -107,7 +137,7 @@ async function RTINGSSearch(monitorModel) {
  * RTINGS review pages have an easy-to-read scorecard (e.g. https://www.rtings.com/monitor/reviews/lg/27gl850-b-27gl83a-b). We want to parse this, and return it in a dictionary for later use (customisable display options).
  * @param {string} url URL (excluding hostname) of the search result
  */
-async function RTINGSExtractScorecard(url) {
+async function RTINGSExtractScorecard(url: string): Promise<ScoreCard> {
   console.debug("Grabbing monitor details from url: " + url);
   try {
     const response = await fetch("https://www.rtings.com" + url);
@@ -119,34 +149,40 @@ async function RTINGSExtractScorecard(url) {
     const className = "scorecard-table";
     var scorecardtable = doc.getElementsByClassName(className)[0];
 
-    var scorecard = {};
+    var scorecard: ScoreCard = {};
+
+    // For each scorecard row
     for (let row = 0; row < scorecardtable.children.length; row++) {
-      // For each scorecard row
+      // grab name
+      var reviewAspect: string = (
+        scorecardtable.children[row].getElementsByClassName(
+          "scorecard-row-name"
+        )[0].textContent || ""
+      ).trim();
 
-      // var aspect = elements[i].textContent.trim()
-      var aspect = scorecardtable.children[row]
-        .getElementsByClassName("scorecard-row-name")[0]
-        .textContent.trim(); // grab name
-      var score = scorecardtable.children[row]
-        .getElementsByClassName("e-score_box-value")[0]
-        .textContent.trim(); // grab name
-      // var score = elements[i].previousElementSibling.childNodes[1].textContent //grab score
+      // grab score
+      var reviewScore: string = (
+        scorecardtable.children[row].getElementsByClassName(
+          "e-score_box-value"
+        )[0].textContent || ""
+      ).trim();
 
-      scorecard[aspect] = score;
+      scorecard[reviewAspect] = reviewScore;
     }
 
     console.debug(scorecard);
     return scorecard;
   } catch (error) {
     console.error("There was a problem with the fetch operation:", error);
+    throw error;
   }
 }
 
 /**
  * Turns our scorecard array into a HTML table
- * @param {Object} scorecard
+ * @param {ScoreCard} scorecard
  */
-function createHTMLTable(scorecard) {
+function createHTMLTable(scorecard: ScoreCard) {
   const newTable = document.createElement("table");
   newTable.innerHTML = "<thead><th>Aspect</th><th>Score</th></thead>";
 
@@ -170,14 +206,20 @@ function createHTMLTable(scorecard) {
  * @param {Element} popupElement
  * @param {string} modelNumber
  */
-async function setupHover(elementToHover, popupElement, modelNumber) {
+async function setupHover(
+  elementToHover: HTMLElement,
+  popupElement: HTMLDivElement,
+  modelNumber: string
+) {
   // Function to handle hover functionality
-  const escapeRegExp = (string) =>
-    string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const escapeRegExp = (str: string) =>
+    str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
   // Create a link element
-  let linkElement = document.createElement("a");
-  linkElement.className = hashCode(elementToHover.className + modelNumber);
+  let linkElement: HTMLAnchorElement = document.createElement("a");
+  linkElement.className = hashCode(
+    elementToHover.className + modelNumber
+  ).toString();
   linkElement.href = "rtings.com";
   linkElement.textContent = modelNumber;
   linkElement.style.cursor = "pointer"; // Optional: Change cursor to pointer
@@ -191,7 +233,7 @@ async function setupHover(elementToHover, popupElement, modelNumber) {
   elementToHover.insertAdjacentElement("afterbegin", linkElement);
   linkElement.insertAdjacentHTML("afterbegin", "<br />  ");
 
-  let pClone = popupElement.cloneNode(true);
+  let pClone: HTMLDivElement = popupElement.cloneNode(true) as HTMLDivElement;
 
   // Append the popup element
   elementToHover.appendChild(pClone);
@@ -208,7 +250,7 @@ async function setupHover(elementToHover, popupElement, modelNumber) {
   });
 }
 
-function hashCode(str) {
+function hashCode(str: string) {
   let hash = 0;
   for (let i = 0, len = str.length; i < len; i++) {
     let chr = str.charCodeAt(i);
@@ -217,3 +259,10 @@ function hashCode(str) {
   }
   return hash;
 }
+
+// TYPE DECLARATIONS //
+
+type ScoreCard = {
+  [aspect: string]: string;
+};
+// type ScoreCard = ReviewScore[];

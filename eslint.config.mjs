@@ -3,7 +3,7 @@ import pluginJs from "@eslint/js";
 
 export default [
   {
-    files: ["src/*.js"],
+    files: ["src/*.js", "built/*.js"],
     languageOptions: {
       globals: {
         ...globals.browser,
@@ -15,6 +15,7 @@ export default [
         setupHover: "readonly",
         popupDiv: "readonly",
         popupDivs: "readonly",
+        apiKey: "readonly",
       },
     },
   },

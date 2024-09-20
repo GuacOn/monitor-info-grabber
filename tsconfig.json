@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "outDir": "./built",
+    "allowJs": true,
+    "strict": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "target": "ES6"
+  },
+  "include": ["./src/**/*"],
+  "types": ["firefox-webext-browser"]
+}
