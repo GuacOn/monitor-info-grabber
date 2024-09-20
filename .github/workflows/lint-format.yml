@@ -21,3 +21,20 @@ jobs:
         run: yarn run lint
       - name: Prettier
         run: yarn prettier --write .
+
+      - name: Set outputs
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      
+      - name: Compile
+        run: yarn run build
+
+      - name: "Build package"
+        id: web-ext-build
+        uses: kewisch/action-web-ext@v1
+        with:
+          cmd: build
+          source: built
+          filename: "monitor-info-grabber-${{ steps.vars.outputs.sha_short }}.xpi"
+
+      - run: ls built

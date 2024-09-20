@@ -27,17 +27,19 @@ jobs:
       - name: Set outputs
         id: vars
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      
+      - name: Compile
+        run: yarn run build
 
       - name: "Build package"
         id: web-ext-build
         uses: kewisch/action-web-ext@v1
         with:
           cmd: build
-          source: src
+          source: built
           filename: "monitor-info-grabber-${{ steps.vars.outputs.sha_short }}.xpi"
-          ignoreFiles: '[ "package.json","package-lock.json","yarn.lock" ]'
 
-      - run: ls src
+      - run: ls built
 
       - name: "Publish Firefox Extension"
         uses: wdzeng/firefox-addon@v1
