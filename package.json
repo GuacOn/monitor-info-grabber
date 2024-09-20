@@ -1,6 +1,6 @@
 {
   "name": "monitor-info-grabber",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "",
   "scripts": {
     "setup": "npm i",

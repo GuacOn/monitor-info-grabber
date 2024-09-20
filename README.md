@@ -10,3 +10,5 @@ This project uses:
 - AI! (via OpenAI's gpt-4o-mini API)
 - Firefox Extensions
 - Github Actions (pushing to `main` branch (with a bumped version number) will build and deploy to Firefox Add-ons automatically using GH Actions)
+
+![](https://github.com/GuacOn/monitor-info-grabber/usage-example.gif)
