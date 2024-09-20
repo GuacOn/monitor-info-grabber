@@ -88,7 +88,7 @@ async function GPTFetchMonitorModel(
  */
 async function RTINGSSearch(
   monitorModel: string
-): Promise<HTMLElement | undefined> {
+): Promise<[HTMLElement, string] | undefined> {
   console.debug("Searching RTINGS for model: " + monitorModel);
   try {
     const requestOptions = {
@@ -124,7 +124,7 @@ async function RTINGSSearch(
         // Extract the information we are interested in, and return it
         let scorecard = await RTINGSExtractScorecard(searchResult.url);
         let HTMLTable = createHTMLTable(scorecard);
-        return HTMLTable;
+        return [HTMLTable, searchResult.url];
       }
     }
   } catch (error) {
@@ -202,14 +202,12 @@ function createHTMLTable(scorecard: ScoreCard) {
 
 /**
  * Replaces text with a hoverable link that will show a popup with the scorecard table
- * @param {Element} elementToHover HTML
- * @param {Element} popupElement
- * @param {string} modelNumber
  */
 async function setupHover(
   elementToHover: HTMLElement,
   popupElement: HTMLDivElement,
-  modelNumber: string
+  modelNumber: string,
+  modelURL: string
 ) {
   // Function to handle hover functionality
   const escapeRegExp = (str: string) =>
@@ -220,7 +218,7 @@ async function setupHover(
   linkElement.className = hashCode(
     elementToHover.className + modelNumber
   ).toString();
-  linkElement.href = "rtings.com";
+  linkElement.href = `https://www.rtings.com${modelURL}`;
   linkElement.textContent = modelNumber;
   linkElement.style.cursor = "pointer"; // Optional: Change cursor to pointer
   linkElement.style.textDecoration = "underline"; // Optional: Underline link

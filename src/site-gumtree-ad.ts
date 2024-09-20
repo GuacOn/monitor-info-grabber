@@ -35,8 +35,9 @@ async function modifyPage(apiKey: string): Promise<void> {
           let model: string = modelNumber.split(", ")[i];
 
           // Search RTINGS API for monitor model
-          let HTMLScorecardTable = await RTINGSSearch(model);
-          if (HTMLScorecardTable) {
+          let result = await RTINGSSearch(model);
+          if (result) {
+            let [HTMLScorecardTable, modelURL] = result;
             // If model found
             // Create our scorecard popup (unique per model)
             let popupDiv = document.createElement("div");
@@ -58,7 +59,7 @@ async function modifyPage(apiKey: string): Promise<void> {
             elementsArray.forEach((element) => {
               // const elements = document.getElementsByClassName(className);
               // for (let i = 0; i < elements.length; i++) {
-              setupHover(element as HTMLElement, popupDivs[i], model);
+              setupHover(element as HTMLElement, popupDivs[i], model, modelURL);
               // }
             });
           }

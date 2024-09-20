@@ -14,19 +14,20 @@ async function modifyPage(apiKey: string) {
     let adTitle = elements[i].textContent + "\n";
     let adDescriptionElement = elements[i].parentElement?.nextElementSibling?.nextElementSibling?.children[0];
     let adDescription: string = adDescriptionElement?.textContent ?? '';
- 
+
     // Combine the two elements for our prompt
     let gptPromptAdText = adTitle + adDescription;
 
     // Send to GPT for analysis
     tasks.push(
       GPTFetchMonitorModel(apiKey, gptPromptAdText).then(
-        async function (value) {
-          console.log("Calling func retrieved model number: " + value);
+        async function (modelName) {
+          console.log("Calling func retrieved model number: " + modelName);
 
           // Search RTINGS API for monitor model
-          let HTMLScorecardTable = await RTINGSSearch(value);
-          if (HTMLScorecardTable) {
+          let result = await RTINGSSearch(modelName);
+          if (result) {
+            let [HTMLScorecardTable, modelURL] = result;
             // If model found
             // Create our scorecard popup (unique per model)
             let popupDiv = document.createElement("div");
@@ -47,7 +48,7 @@ async function modifyPage(apiKey: string) {
 
             // const elements = document.getElementsByClassName(className);
             // for (let i = 0; i < elements.length; i++) {
-            setupHover(elements[i] as HTMLElement, popupDivs[i], value);
+            setupHover(elements[i] as HTMLElement, popupDivs[i], modelName, modelURL);
             // }
           }
         },
