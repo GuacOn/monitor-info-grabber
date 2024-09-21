@@ -1,5 +1,8 @@
 // Description: Loaded on the Gumtree search page 
 
+import { MIGCore } from './MIGCore';
+const migCore = new MIGCore();
+
 /**
  * For each ad result, queries ad text + description, and supplements ad title with RTINGS data.
  */
@@ -20,12 +23,12 @@ async function modifyPage(apiKey: string) {
 
     // Send to GPT for analysis
     tasks.push(
-      GPTFetchMonitorModel(apiKey, gptPromptAdText).then(
+      migCore.GPTFetchMonitorModel(apiKey, gptPromptAdText).then(
         async function (modelName) {
           console.log("Calling func retrieved model number: " + modelName);
 
           // Search RTINGS API for monitor model
-          let result = await RTINGSSearch(modelName);
+          let result = await migCore.RTINGSSearch(modelName);
           if (result) {
             let [HTMLScorecardTable, modelURL] = result;
             // If model found
@@ -41,14 +44,14 @@ async function modifyPage(apiKey: string) {
             popupDiv.style.padding = "8px";
             popupDiv.style.borderRadius = "5px;";
 
-            popupDivs[i] = popupDiv;
+            migCore.popupDivs[i] = popupDiv;
 
             // Add HTML scorecard table to our popupDiv
-            popupDivs[i].appendChild(HTMLScorecardTable);
+            migCore.popupDivs[i].appendChild(HTMLScorecardTable);
 
             // const elements = document.getElementsByClassName(className);
             // for (let i = 0; i < elements.length; i++) {
-            setupHover(elements[i] as HTMLElement, popupDivs[i], modelName, modelURL);
+            migCore.setupHover(elements[i] as HTMLElement, migCore.popupDivs[i], modelName, modelURL);
             // }
           }
         },
@@ -64,5 +67,5 @@ async function modifyPage(apiKey: string) {
   // Wait for all API calls to complete
   await Promise.all(tasks);
 
-  console.log(`${manifest.name} has finished replacing elements on this page.`);
+  console.log(`${migCore.getExtensionName()} has finished replacing elements on this page.`);
 }

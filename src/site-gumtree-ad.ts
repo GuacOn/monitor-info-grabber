@@ -1,5 +1,8 @@
 // Description: Gumtree specific ad page modifications.
 
+import { MIGCore } from './MIGCore';
+const migCore = new MIGCore();
+
 /**
  * Takes a list of HTML element class names (usually ad title + description), concatenates the textContent for GPT, then supplements any monitor models found with RTINGS review data.
  * @param {string} apiKey OpenAI API key (https://platform.openai.com/api-keys)
@@ -26,7 +29,7 @@ async function modifyPage(apiKey: string): Promise<void> {
 
   // Send to GPT for analysis
   tasks.push(
-    GPTFetchMonitorModel(apiKey, gptPromptAdText).then(
+    migCore.GPTFetchMonitorModel(apiKey, gptPromptAdText).then(
       async function (modelNumber) {
         console.log("Calling func retrieved model number: " + modelNumber);
 
@@ -35,7 +38,7 @@ async function modifyPage(apiKey: string): Promise<void> {
           let model: string = modelNumber.split(", ")[i];
 
           // Search RTINGS API for monitor model
-          let result = await RTINGSSearch(model);
+          let result = await migCore.RTINGSSearch(model);
           if (result) {
             let [HTMLScorecardTable, modelURL] = result;
             // If model found
@@ -51,15 +54,15 @@ async function modifyPage(apiKey: string): Promise<void> {
             popupDiv.style.padding = "8px";
             popupDiv.style.borderRadius = "5px;";
 
-            popupDivs[i] = popupDiv;
+            migCore.popupDivs[i] = popupDiv;
 
             // Add HTML scorecard table to our popupDiv
-            popupDivs[i].appendChild(HTMLScorecardTable);
+            migCore.popupDivs[i].appendChild(HTMLScorecardTable);
 
             elementsArray.forEach((element) => {
               // const elements = document.getElementsByClassName(className);
               // for (let i = 0; i < elements.length; i++) {
-              setupHover(element as HTMLElement, popupDivs[i], model, modelURL);
+              migCore.setupHover(element as HTMLElement, migCore.popupDivs[i], model, modelURL);
               // }
             });
           }
@@ -76,5 +79,5 @@ async function modifyPage(apiKey: string): Promise<void> {
   // Wait for all API calls to complete
   await Promise.all(tasks);
 
-  console.log(`${manifest.name} has finished replacing elements on this page.`);
+  console.log(`${migCore.getExtensionName()} has finished replacing elements on this page.`);
 }
