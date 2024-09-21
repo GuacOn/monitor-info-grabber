@@ -1,11 +1,18 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "Monitor Info Grabber",
   "version": "1.0.5",
   "description": "Uses AI to supplement listings for used monitors with information from the Rtings review site.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{c00adf06-6c35-4fea-9c27-c708f83a4a5e}"
+    }
+  },
   "permissions": [
     "activeTab",
-    "storage",
+    "storage"
+  ],
+  "host_permissions": [
     "*://*.gumtree.com.au/s-monitors/*",
     "https://api.openai.com/v1/chat/completions",
     "https://www.rtings.com/search",
@@ -15,8 +22,7 @@
     "96": "icons/border-96.png"
   },
   "options_ui": {
-    "page": "options.html",
-    "browser_style": true
+    "page": "options.html"
   },
   "content_scripts": [
     {

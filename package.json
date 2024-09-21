@@ -2,6 +2,7 @@
   "name": "monitor-info-grabber",
   "version": "1.0.5",
   "description": "",
+  "type": "module",
   "scripts": {
     "setup": "npm i",
     "build": "tsc && npm run copy-files",
