@@ -8,10 +8,7 @@
       "id": "{c00adf06-6c35-4fea-9c27-c708f83a4a5e}"
     }
   },
-  "permissions": [
-    "activeTab",
-    "storage"
-  ],
+  "permissions": ["activeTab", "storage", "scripting"],
   "host_permissions": [
     "*://*.gumtree.com.au/s-monitors/*",
     "https://api.openai.com/v1/chat/completions",
@@ -24,18 +21,14 @@
   "options_ui": {
     "page": "options.html"
   },
-  "content_scripts": [
+  "background": {
+    "scripts": ["MIGCore.js"],
+    "type": "module"
+  },
+  "web_accessible_resources": [
     {
-      "matches": ["*://*.gumtree.com.au/s-monitors/*"],
-      "js": ["MIGCore.js", "site-gumtree-search.js"]
-    },
-    {
-      "matches": ["*://*.gumtree.com.au/s-ad/*"],
-      "js": ["MIGCore.js", "site-gumtree-ad.js"]
-    },
-    {
-      "matches": ["*://*.reddit.com/r/hardwareswap/comments/*"],
-      "js": ["MIGCore.js", "site-reddit-hardwareswap-post.js"]
+      "resources": ["site-gumtree-ad.js"],
+      "matches": ["*://*.gumtree.com.au/s-ad/*"]
     }
   ]
 }

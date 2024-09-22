@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "setup": "npm i",
-    "build": "tsc && npm run copy-files",
+    "build": "npx rimraf built && tsc && npm run copy-files",
     "rebuild": "npm run clean && npm i && tsc && npm run copy-files",
     "clean": "npx rimraf built node_modules package-lock.json",
     "copy-files": "npx copyfiles -e src/*.ts -u 1 -s src/* src/icons/* built/",

@@ -23,7 +23,7 @@ async function modifyPage(apiKey: string) {
 
     // Send to GPT for analysis
     tasks.push(
-      migCore.GPTFetchMonitorModel(apiKey, gptPromptAdText).then(
+      migCore.GPTFetchMonitorModel(gptPromptAdText).then(
         async function (modelName) {
           console.log("Calling func retrieved model number: " + modelName);
 

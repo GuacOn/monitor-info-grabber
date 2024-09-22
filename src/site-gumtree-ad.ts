@@ -1,6 +1,7 @@
 // Description: Gumtree specific ad page modifications.
 
-import { MIGCore } from './MIGCore';
+// import { MIGCore } from './MIGCore';
+// @ts-ignore
 const migCore = new MIGCore();
 
 /**
@@ -8,7 +9,7 @@ const migCore = new MIGCore();
  * @param {string} apiKey OpenAI API key (https://platform.openai.com/api-keys)
  */
 // @ts-ignore
-async function modifyPage(apiKey: string): Promise<void> {
+async function main(): Promise<void> {
   const elementsArray: Element[] = [
     document.getElementsByClassName("vip-ad-title__header")[0],
     document.getElementsByClassName("vip-ad-description__content--wrapped")[0],
@@ -29,8 +30,8 @@ async function modifyPage(apiKey: string): Promise<void> {
 
   // Send to GPT for analysis
   tasks.push(
-    migCore.GPTFetchMonitorModel(apiKey, gptPromptAdText).then(
-      async function (modelNumber) {
+    migCore.GPTFetchMonitorModel(gptPromptAdText).then(
+      async function (modelNumber: string) {
         console.log("Calling func retrieved model number: " + modelNumber);
 
         // For each unique model found
@@ -68,7 +69,7 @@ async function modifyPage(apiKey: string): Promise<void> {
           }
         }
       },
-      function (error) {
+      function (error: any) {
         console.log("Calling func error: " + error);
       }
     )
@@ -81,3 +82,5 @@ async function modifyPage(apiKey: string): Promise<void> {
 
   console.log(`${migCore.getExtensionName()} has finished replacing elements on this page.`);
 }
+
+main();

@@ -1,26 +1,63 @@
 /*eslint no-unused-vars: "off"*/
-import { Config } from './config';
+// import { Config } from './config';
+// import config from './config/config.json';
+
+console.log("Helloooooooo!");
+
+export class Config {
+  public OPENAI_API_URL: string;
+  public PROMPT_PREFIX: string;
+  public RTINGS_API_URL: string;
+
+  constructor() {
+    this.OPENAI_API_URL = "https://api.openai.com/v1/chat/completions"
+    this.PROMPT_PREFIX = "Extract and return just the model of the monitor from the advertisement text below. Tip: the model number will contain no spaces, and at least one letter and one number. If there is no model number, say 'no'.\n\n"
+    this.RTINGS_API_URL = "https://www.rtings.com/api/v2/safe/app/search__search_results"
+  }
+}
 
 export class MIGCore {
+  public static main() {
+    console.log("Hello, World!");
+    const instance = new MIGCore();
+    // instance.registerContentScript();
+  }
+
   private config: Config;
   private manifest: any;
+  private apiKey: string | undefined;
   public popupDivs: HTMLDivElement[] = [];
 
   constructor() {
-    this.config = require('./this.config/this.config.json');
+    this.config = new Config();
     this.manifest = browser.runtime.getManifest();
+    this.popupDivs = [];
     this.initialize();
   }
 
   private async initialize() {
     try {
-      const apiKey = await browser.storage.local.get("api_key");
+      const result = await browser.storage.local.get("api_key");
+      this.apiKey = result.api_key;
       // this.onGot(apiKey);
-      return apiKey;
+      this.registerContentScript();
     } catch (error) {
       // this.onError(error);
       alert("Please set your OpenAI API key in the extension settings.");
       console.log(`Error: ${error}`);
+    }
+  }
+
+  private async registerContentScript() {
+    try {
+      await browser.scripting.registerContentScripts([{
+        matches: ["*://*.gumtree.com.au/*"],
+        js: ["site-gumtree-ad.js"],
+        id: "site-gumtree-ad"
+      }]);
+      console.log("Content script registered successfully.");
+    } catch (error) {
+      console.error(`Failed to register content script: ${error}`);
     }
   }
 
@@ -31,7 +68,6 @@ export class MIGCore {
    * @param {string} promptText Advertisement text to send to GPT for analysis
    */
   async GPTFetchMonitorModel(
-    apiKey: string,
     promptText: string
   ): Promise<string> {
     try {
@@ -43,7 +79,7 @@ export class MIGCore {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
+          Authorization: `Bearer ${this.apiKey}`,
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
@@ -252,6 +288,8 @@ export class MIGCore {
     return this.manifest.name;
   }
 }
+
+MIGCore.main();
 
 // TYPE DECLARATIONS //
 
