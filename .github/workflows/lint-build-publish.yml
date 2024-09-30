@@ -1,13 +1,17 @@
-name: build
+name: ci-pipeline
 
 on:
   push:
     branches:
       - main
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
-  build:
-    name: "Build"
+  ci-pipeline:
+    name: "CI Pipeline"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,30 +22,43 @@ jobs:
       - name: Install
         run: yarn install
 
-      - name: ESLint
-        run: yarn run lint
-
       - name: Prettier
         run: yarn prettier --write .
+
+      - name: ESLint
+        run: yarn run lint
 
       - name: Set outputs
         id: vars
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-      
+
       - name: Compile
         run: yarn run build
 
-      - name: "Build package"
+      - run: ls built
+
+      - name: "Create Release PR"
+        uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Build Firefox Extension Package"
         id: web-ext-build
         uses: kewisch/action-web-ext@v1
         with:
           cmd: build
           source: built
-          filename: "monitor-info-grabber-${{ steps.vars.outputs.sha_short }}.xpi"
+          filename: "{name}-{version}.xpi"
 
-      - run: ls built
+      - name: Upload Release Artifact to GitHub
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ steps.release.outputs.tag_name }} ${{ steps.web-ext-build.outputs.target }}
 
       - name: "Publish Firefox Extension"
+        if: ${{ steps.release.outputs.release_created }}
         uses: wdzeng/firefox-addon@v1
         with:
           addon-guid: ${{ secrets.FIREFOX_EXTENSION_UUID }}

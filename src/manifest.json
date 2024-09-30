@@ -1,8 +1,9 @@
 {
   "manifest_version": 2,
-  "name": "Monitor Info Grabber",
+  "name": "Monitor Review Finder",
   "version": "1.0.5",
-  "description": "Uses AI to supplement listings for used monitors with information from the Rtings review site.",
+  "summary": "Supplements listings for used monitors with information from the Rtings review site.",
+  "description": "This extension will run on some specific web pages that contain advertisements for PC monitors. If it finds a monitor that has been reviewed on the RTINGS review site, it will grab the review scores from there and add them to the advertisement page, so you can see how good a monitor is without the extra steps of looking for it yourself.\n\nThe link added to the page goes to the full review so you can check out the details.\n\nThis project is open source, and contributions are welcome: https://github.com/GuacOn/monitor-info-grabber",
   "permissions": [
     "activeTab",
     "storage",
