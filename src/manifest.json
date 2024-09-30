@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Monitor Review Finder",
-  "version": "1.0.5",
+  "version": "1.1.0",
   "summary": "Supplements listings for used monitors with information from the Rtings review site.",
   "description": "This extension will run on some specific web pages that contain advertisements for PC monitors. If it finds a monitor that has been reviewed on the RTINGS review site, it will grab the review scores from there and add them to the advertisement page, so you can see how good a monitor is without the extra steps of looking for it yourself.\n\nThe link added to the page goes to the full review so you can check out the details.\n\nThis project is open source, and contributions are welcome: https://github.com/GuacOn/monitor-info-grabber",
   "permissions": [
@@ -21,16 +21,31 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://*.gumtree.com.au/s-monitors/*"],
-      "js": ["MIGCore.js", "site-gumtree-search.js"]
+      "matches": [
+        "*://*.gumtree.com.au/s-monitors/*"
+      ],
+      "js": [
+        "MIGCore.js",
+        "site-gumtree-search.js"
+      ]
     },
     {
-      "matches": ["*://*.gumtree.com.au/s-ad/*"],
-      "js": ["MIGCore.js", "site-gumtree-ad.js"]
+      "matches": [
+        "*://*.gumtree.com.au/s-ad/*"
+      ],
+      "js": [
+        "MIGCore.js",
+        "site-gumtree-ad.js"
+      ]
     },
     {
-      "matches": ["*://*.reddit.com/r/hardwareswap/comments/*"],
-      "js": ["MIGCore.js", "site-reddit-hardwareswap-post.js"]
+      "matches": [
+        "*://*.reddit.com/r/hardwareswap/comments/*"
+      ],
+      "js": [
+        "MIGCore.js",
+        "site-reddit-hardwareswap-post.js"
+      ]
     }
   ]
 }
